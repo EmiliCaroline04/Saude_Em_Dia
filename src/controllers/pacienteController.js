@@ -1,48 +1,33 @@
-const pool = require("../config/db");
+const PacienteService = require("../service/pacienteService");
 
 exports.criarPaciente = async (req, res) => {
 
-  const {
-    nome,
-    cpf,
-    endereco,
-    telefone,
-    sexo,
-    data_nascimento
-  } = req.body;
+    const dados = req.body;
 
-  try {
+    try {
+        const paciente = await PacienteService.criarPaciente(dados);
 
-    const result = await pool.query(
-      `INSERT INTO paciente
-      (nome, cpf, endereco, telefone, sexo, data_nascimento)
-      VALUES ($1,$2,$3,$4,$5,$6)
-      RETURNING *`,
-      [nome, cpf, endereco, telefone, sexo, data_nascimento]
-    );
+        res.json(paciente);
 
-    res.json(result.rows[0]);
+    } catch (error) {
 
-  } catch (error) {
+        res.status(500).json({ erro: error.message });
 
-    res.status(500).json({ erro: error.message });
-
-  }
+    }
 
 };
 
 exports.listarPacientes = async (req, res) => {
 
-  try {
+    try {
+        const pacientes = await PacienteService.listarPacientes();
 
-    const result = await pool.query("SELECT * FROM paciente");
+        res.json(pacientes);
 
-    res.json(result.rows);
+    } catch (error) {
 
-  } catch (error) {
+        res.status(500).json({ erro: error.message });
 
-    res.status(500).json({ erro: error.message });
-
-  }
+    }
 
 };

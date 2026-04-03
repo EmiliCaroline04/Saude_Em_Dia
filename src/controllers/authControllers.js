@@ -1,38 +1,18 @@
-const pool = require("../config/db");
+const AuthService = require("../service/authService");
 
 exports.logarUsuario = async (req, res) => {
 
     const {
-        usuario,
-        senha
+        email,
+        senha_hash
     } = req.body;
 
     try {
-        const resultadoBusca = await pool.query(
-            "SELECT * FROM usuarios WHERE usuario = $1",
-            [usuario]
-        );
-
-        if (resultadoBusca.rows.length === 0) {
-            return res.status(401).json({
-                message: "Usuário não cadastrado."
-            });
-        }
-
-        const usuarioBanco = resultadoBusca.rows[0];
-
-        if (usuarioBanco.senha !== senha) {
-            return res.status(401).json({
-                message: "Senha inválida."
-            });
-        }
+        const usuario = await AuthService.logarUsuario(email, senha_hash);
 
         res.json({
             message: "Login bem-sucedido!",
-            usuario: {
-                id: usuarioBanco.id,
-                usuario: usuarioBanco.usuario
-            }
+            usuario: usuario
         });
 
     } catch (error) {

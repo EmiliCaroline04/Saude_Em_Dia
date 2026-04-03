@@ -1,35 +1,21 @@
-const pool = require("../config/db");
-const bcrypt = require("bcrypt");
+const UsuarioService = require("../service/usuarioService");
 
 exports.criarUsuario = async (req, res) => {
 
-  const { email, senha_hash, id_perfil } = req.body;
+    const dados = req.body;
 
-  try {
+    try {
+        const usuario = await UsuarioService.criarUsuario(dados);
 
-    if (!email || !senha_hash || !id_perfil) {
-      return res.status(400).json({ message: "Campos obrigatórios faltando." });
+        res.json(usuario);
+
+    } catch (error) {
+
+        res.status(500).json({ erro: error.message });
+
     }
 
-    // criptografa senha
-    const senhaHash = await bcrypt.hash(senha_hash, 10);
+    // INATIVAR USUÁRIO
 
-    const result = await pool.query(
-      `INSERT INTO usuarios (email, senha_hash, id_perfil, ativo, data_criacao)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [email, senhaHash, id_perfil, true, new Date()]
-    );
-
-    res.json(result.rows[0]);
-
-  } catch (error) {
-
-    res.status(500).json({ erro: error.message });
-
-  }
-
-  // INATIVAR USUÁRIO
-
-  //EXCLUIR USUÁRIO
+    //EXCLUIR USUÁRIO
 };
