@@ -9,17 +9,37 @@ class UsuarioService {
             throw new Error("Campos obrigatórios faltando.");
         }
 
+        // Verifica se o usuário já existe
+        const existeUsuario = await pool.query(`SELECT * FROM usuarios WHERE email = $1`, [email]);
+        if (existeUsuario.rows.length > 0) {
+            throw new Error("Usuário com este email já existe.");
+        }
+
         // criptografa senha
         const senhaHash = await bcrypt.hash(senha_hash, 10);
 
-        const result = await pool.query(
+        const resultado = await pool.query(
             `INSERT INTO usuarios (email, senha_hash, id_perfil, ativo, data_criacao)
              VALUES ($1, $2, $3, $4, $5)
              RETURNING *`,
             [email, senhaHash, id_perfil, true, new Date()]
         );
 
-        return result.rows[0];
+        return resultado.rows[0];
+    }
+
+    static async excluirUsuario(id_usuario) {
+        if (!id_usuario) {
+            throw new Error("ID do usuário é obrigatório.");
+        }
+
+        const resultado = await pool.query(`DELETE FROM usuarios WHERE id_usuario = $1 RETURNING *`, [id_usuario]);
+
+        if (resultado.rows.length === 0) {
+            throw new Error("Usuário não encontrado.");
+        }
+
+        return resultado.rows[0];
     }
 }
 
