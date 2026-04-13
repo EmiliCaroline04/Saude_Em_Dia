@@ -41,6 +41,42 @@ class UsuarioService {
 
         return resultado.rows[0];
     }
+
+    static async excluirMedico(id_medicamento, id_perfil) {
+        if (!id_perfil) {
+            throw new Error("Perfil do usuário é obrigatório.");
+        }
+
+        if (Number(id_perfil) !== 1) {
+            throw new Error("Apenas administradores podem excluir médicos.");
+        }
+
+        if (!id_medicamento) {
+            throw new Error("ID do médico é obrigatório.");
+        }
+
+        const resultado = await pool.query(`DELETE FROM medico WHERE id_medico = $1 RETURNING *`, [id_medicamento]);
+
+        if (resultado.rows.length === 0) {
+            throw new Error("Médico não encontrado.");
+        }
+
+        return resultado.rows[0];
+    }
+
+    static async excluirPaciente(id_paciente) {
+        if (!id_paciente) {
+            throw new Error("ID do paciente é obrigatório.");
+        }
+
+        const resultado = await pool.query(`DELETE FROM paciente WHERE id_paciente = $1 RETURNING *`, [id_paciente]);
+
+        if (resultado.rows.length === 0) {
+            throw new Error("Paciente não encontrado.");
+        }
+
+        return resultado.rows[0];
+    }
 }
 
 module.exports = UsuarioService;

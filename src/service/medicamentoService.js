@@ -58,6 +58,47 @@ class MedicamentoService {
 
         return result.rows[0];
     }
+
+    static async buscarMedicamentosPorPaciente(idPaciente) {
+        if (!idPaciente) {
+            throw new Error("Informe o paciente.");
+        }
+
+        const paciente = await pool.query(
+            "SELECT * FROM paciente WHERE id_paciente = $1",
+            [idPaciente]
+        );
+
+        if (paciente.rows.length === 0) {
+            throw new Error("Paciente não encontrado.");
+        }
+
+        const result = await pool.query(
+            `SELECT nome, dose
+             FROM medicamentos
+             WHERE id_paciente = $1`,
+            [idPaciente]
+        );
+
+        return result.rows;
+    }
+
+    static async excluirMedicamento(id_medicamento) {
+        if (!id_medicamento) {
+            throw new Error("ID do medicamento é obrigatório.");
+        }
+
+        const resultado = await pool.query(
+            `DELETE FROM medicamentos WHERE id_medicamento = $1 RETURNING *`,
+            [id_medicamento]
+        );
+
+        if (resultado.rows.length === 0) {
+            throw new Error("Medicamento não encontrado.");
+        }
+
+        return resultado.rows[0];
+    }
 }
 
 module.exports = MedicamentoService;
