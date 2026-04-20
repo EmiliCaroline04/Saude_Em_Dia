@@ -1,16 +1,15 @@
-const routes = [
+// Definição das rotas principais da aplicação
+const rotas = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
   },
-
-  // Always leave this as last one,
-  // but you can also remove it
+  // Rota para página de erro 404 (deve ser a última)
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
 ]
 
-export default routes
+export default rotas
