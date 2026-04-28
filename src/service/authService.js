@@ -25,7 +25,8 @@ class AuthService {
 
         return {
             id: usuarioBanco.id,
-            email: usuarioBanco.email
+            email: usuarioBanco.email,
+            id_perfil: usuarioBanco.id_perfil
         };
     }
 }

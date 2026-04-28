@@ -3,11 +3,12 @@ const MedicoService = require("../service/medicoService");
 exports.criarMedico = async (req, res) => {
 
     const dados = req.body;
+    const idPerfil = req.headers["id-perfil"];
 
     try {
-        const medico = await MedicoService.criarMedico(dados);
+        const medico = await MedicoService.criarMedico(dados, idPerfil);
 
-        res.json(medico);
+        res.json({ message: "Médico criado com sucesso!", medico });
 
     } catch (error) {
 

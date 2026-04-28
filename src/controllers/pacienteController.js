@@ -31,3 +31,35 @@ exports.listarPacientes = async (req, res) => {
     }
 
 };
+
+exports.agendarConsulta = async (req, res) => {
+    const dados = req.body;
+    const { id_paciente } = req.params;
+
+    try {
+        const agendamento = await PacienteService.agendarConsulta(dados, id_paciente);
+
+        res.json({ message: "Consulta agendada com sucesso!", agendamento });
+
+    } catch (error) {
+
+        res.status(500).json({ erro: error.message });
+
+    }
+};
+
+exports.cancelarConsulta = async (req, res) => {
+    const { id_agendamento } = req.params;
+    const { id_paciente } = req.params;
+
+    try {
+        const agendamento = await PacienteService.cancelarConsulta(id_agendamento, id_paciente);
+
+        res.json({ message: "Consulta cancelada com sucesso!", agendamento });
+
+    } catch (error) {
+
+        res.status(500).json({ erro: error.message });
+
+    }
+};

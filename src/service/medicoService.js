@@ -1,7 +1,12 @@
 const pool = require("../config/db");
 
 class MedicoService {
-    static async criarMedico(dados) {
+    static async criarMedico(dados, idPerfil) {
+        // Verificar se o usuário é administrador
+        if (!idPerfil || Number(idPerfil) !== 1) {
+            throw new Error("Apenas administradores podem criar médicos.");
+        }
+
         const {
             crm,
             nome,
