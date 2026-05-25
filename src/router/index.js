@@ -2,7 +2,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { obterToken } from '../services/authService'
 
-// Definição das rotas principais do app
 const rotas = [
   {
     path: '/',
@@ -10,14 +9,32 @@ const rotas = [
     children: [
       { path: '', component: () => import('../pages/bemVindo.vue') },
       { path: '/login', component: () => import('../pages/login.vue') },
-      // { path: '/cadastro', component: () => import('../pages/cadastro.vue') },
       { path: '/cadastro-med', component: () => import('../pages/cadastroMed.vue') },
       {
         path: '/home',
         component: () => import('../pages/IndexPage.vue'),
         meta: { requerAutenticacao: true },
       },
+      {
+        path: '/cadastro-medicamento',
+        component: () => import('../pages/medicamentoPage.vue'),
+        meta: { requerAutenticacao: true },
+      },
+      {
+        path: '/emergencia',
+        component: () => import('../pages/emergenciapage.vue'),
+        meta: { requerAutenticacao: true },
+      },
+      {
+        path: '/alarme',
+        component: () => import('../pages/alarmepage.vue'),
+        meta: { requerAutenticacao: true },
+      },
     ],
+  },
+  {
+    path: '/:catchAll(.*)*',
+    component: () => import('../pages/ErrorNotFound.vue'),
   },
 ]
 
@@ -26,18 +43,19 @@ const roteador = createRouter({
   routes: rotas,
 })
 
-// Guardião global de rotas
 roteador.beforeEach((to, _from, next) => {
   const estaAutenticado = !!obterToken()
 
-  // Se rota protegida e não autenticado → redireciona para login
   if (to.meta.requerAutenticacao && !estaAutenticado) {
     next('/login')
     return
   }
 
-  // Se autenticado e tentando acessar login/cadastro/boas-vindas → redireciona para home
-  if (estaAutenticado && (to.path === '/login' || to.path === '/cadastro-med' || to.path === '/')) {
+  if (
+    estaAutenticado &&
+    (to.path === '/login' || to.path === '/cadastro-med' || to.path === '/') &&
+    to.path !== '/home'
+  ) {
     next('/home')
     return
   }

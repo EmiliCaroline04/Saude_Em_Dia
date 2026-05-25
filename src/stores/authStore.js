@@ -7,7 +7,7 @@ import {
   logoutMedico,
   getToken,
   getUsuarioLocal,
-} from '@/services/authService'
+} from '../services/authService' // ✅ caminho relativo, não 'src/...'
 
 export const useAuthStore = defineStore('auth', () => {
   const usuario = ref(getUsuarioLocal())
@@ -33,7 +33,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Recebe cpf e senha — senha é passada ao service mas não validada ainda (modo demo)
   async function login(cpf, senha) {
     carregando.value = true
     erro.value = ''

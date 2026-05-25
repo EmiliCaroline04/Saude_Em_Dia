@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh lpR fFf" class="dash-layout">
+  <q-layout view="lHh lpR fFf" :class="['dash-layout', modoEscuro ? 'dark-mode' : '']">
     <!-- ── SIDEBAR ESQUERDA ── -->
     <q-drawer v-model="drawer" :width="72" :breakpoint="600" show-if-above class="sidebar">
       <div class="sidebar-inner">
@@ -10,41 +10,64 @@
 
         <div class="nav-divider" />
 
-        <q-btn flat round class="nav-btn active" @click="secao = 'dashboard'">
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'dashboard' ? 'active' : '']"
+          @click="secao = 'dashboard'"
+        >
           <q-icon name="dashboard" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Dashboard</q-tooltip>
         </q-btn>
 
-        <q-btn flat round class="nav-btn" @click="secao = 'pacientes'">
-          <q-icon name="person_add" size="22px" />
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'pacientes' ? 'active' : '']"
+          @click="secao = 'pacientes'"
+        >
+          <q-icon name="person" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Pacientes</q-tooltip>
         </q-btn>
 
-        <q-btn flat round class="nav-btn" @click="secao = 'agenda'">
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'agenda' ? 'active' : '']"
+          @click="secao = 'agenda'"
+        >
           <q-icon name="event" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Agenda</q-tooltip>
         </q-btn>
 
-        <q-btn flat round class="nav-btn" @click="secao = 'lembretes'">
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'lembretes' ? 'active' : '']"
+          @click="secao = 'lembretes'"
+        >
           <q-icon name="alarm" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Lembretes</q-tooltip>
         </q-btn>
 
-        <q-btn flat round class="nav-btn" @click="secao = 'medicamentos'">
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'medicamentos' ? 'active' : '']"
+          @click="router.push('/cadastro-medicamento')"
+        >
           <q-icon name="medication" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
             >Medicamentos</q-tooltip
           >
         </q-btn>
 
-        <q-btn flat round class="nav-btn" @click="secao = 'cadastro-paciente'">
-          <q-icon name="assignment_ind" size="22px" />
-          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
-            >Cadastro Paciente</q-tooltip
-          >
-        </q-btn>
-
-        <q-btn flat round class="nav-btn" @click="secao = 'emergencia'">
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'emergencia' ? 'active' : '']"
+          @click="router.push('/emergencia')"
+        >
           <q-icon name="local_phone" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
             >Emergência</q-tooltip
@@ -53,7 +76,12 @@
 
         <div class="nav-divider" />
 
-        <q-btn flat round class="nav-btn" @click="secao = 'configuracoes'">
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'configuracoes' ? 'active' : '']"
+          @click="secao = 'configuracoes'"
+        >
           <q-icon name="settings" size="22px" />
           <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
             >Configurações</q-tooltip
@@ -65,149 +93,189 @@
     <!-- ── CONTEÚDO PRINCIPAL ── -->
     <q-page-container>
       <q-page class="dash-page">
-        <!-- HEADER -->
-        <div class="dash-header">
-          <div class="header-left">
-            <span class="header-mes">{{ mesAtual }}</span>
-          </div>
-          <div class="header-right">
-            <span class="header-boas-vindas">Bem-vindo (a) {{ nomeUsuario }}</span>
-            <q-avatar size="44px" class="header-avatar">
-              <q-icon name="person" size="26px" color="white" />
-            </q-avatar>
-            <q-btn flat round class="notif-btn" @click="verNotificacoes">
-              <q-badge color="red" floating>{{ notificacoes }}</q-badge>
-              <q-icon name="notifications" size="26px" color="white" />
+        <!-- ═══════════════ CONFIGURAÇÕES ═══════════════ -->
+        <div v-if="secao === 'configuracoes'" class="config-page">
+          <div class="config-header">
+            <q-btn flat round class="config-back-btn" @click="secao = 'dashboard'">
+              <q-icon name="arrow_back" size="22px" />
             </q-btn>
+            <h2 class="config-title">CONFIGURAÇÕES</h2>
+          </div>
+          <div class="config-card">
+            <div class="config-row">
+              <div class="config-row-left">
+                <q-icon name="notifications" size="28px" class="config-icon" />
+                <span class="config-label">NOTIFICAÇÕES</span>
+              </div>
+              <q-toggle
+                v-model="notifAtivas"
+                color="blue-6"
+                size="56px"
+                @update:model-value="onToggleNotif"
+              />
+            </div>
+            <div class="config-row">
+              <div class="config-row-left">
+                <q-icon name="dark_mode" size="28px" class="config-icon" />
+                <span class="config-label">Modo Escuro</span>
+              </div>
+              <q-toggle
+                v-model="modoEscuro"
+                color="blue-6"
+                size="56px"
+                @update:model-value="onToggleModoEscuro"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- GRID DASHBOARD -->
-        <div class="dash-grid">
-          <!-- Card 1: Dados do paciente -->
-          <div class="card card-dados">
-            <h3 class="card-title">{{ mesAtual }}</h3>
-            <div class="dado-item">
-              <span class="dado-icon">🩸</span
-              ><span
-                >Tipo sanguíneo: <strong>{{ dadosPaciente.tipoSanguineo }}</strong></span
-              >
+        <!-- ═══════════════ DASHBOARD ═══════════════ -->
+        <template v-else>
+          <div class="dash-header">
+            <div class="header-left">
+              <span class="header-mes">{{ mesAtual }}</span>
             </div>
-            <div class="dado-item">
-              <span class="dado-icon">⚖️</span
-              ><span
-                >Peso: <strong>{{ dadosPaciente.peso }} kg</strong></span
-              >
+            <div class="header-right">
+              <span class="header-boas-vindas">Bem-vindo (a) {{ nomeUsuario }}</span>
+              <q-avatar size="44px" class="header-avatar">
+                <q-icon name="person" size="26px" color="white" />
+              </q-avatar>
+              <q-btn v-if="notifAtivas" flat round class="notif-btn" @click="verNotificacoes">
+                <q-badge color="red" floating>{{ notificacoes }}</q-badge>
+                <q-icon name="notifications" size="26px" color="white" />
+              </q-btn>
+              <q-btn v-else flat round class="notif-btn" disabled>
+                <q-icon name="notifications_off" size="26px" color="rgba(255,255,255,0.35)" />
+              </q-btn>
             </div>
-            <div class="dado-item">
-              <span class="dado-icon">🩺</span
-              ><span
-                >Pressão arterial: <strong>{{ dadosPaciente.pressao }}</strong></span
-              >
-            </div>
-            <div class="dado-item">
-              <span class="dado-icon">❤️</span
-              ><span
-                >Frequência cardíaca: <strong>{{ dadosPaciente.frequencia }} bpm</strong></span
-              >
-            </div>
-            <div class="dado-item">
-              <span class="dado-icon">🩸</span
-              ><span
-                >Glicemia (jejum): <strong>{{ dadosPaciente.glicemia }} mg/dL</strong></span
-              >
-            </div>
-            <q-btn
-              flat
-              dense
-              class="btn-editar-dados"
-              icon="edit"
-              label="Editar"
-              @click="editarDados = true"
-            />
           </div>
 
-          <!-- Card 2: Calendário -->
-          <div class="card card-calendario">
-            <q-date
-              v-model="dataCalendario"
-              :events="datasConsultas"
-              event-color="indigo-6"
-              flat
-              minimal
-              class="q-date-custom"
-            />
-          </div>
-
-          <!-- Card 3: Próximas consultas -->
-          <div class="card card-consultas">
-            <h3 class="card-title">PRÓXIMAS CONSULTAS</h3>
-            <div v-for="(c, i) in consultas" :key="i" class="consulta-item">
-              <span
-                >{{ c.data }} - {{ c.hora }}H | <strong>{{ c.medico }}</strong></span
-              >
-            </div>
-            <q-btn
-              flat
-              dense
-              class="btn-add-mini"
-              icon="add"
-              label="Nova consulta"
-              @click="dialogConsulta = true"
-            />
-          </div>
-
-          <!-- Card 4: Estoque -->
-          <div class="card card-estoque">
-            <h3 class="card-title">ESTOQUE</h3>
-            <div class="grafico-barras">
-              <div v-for="med in medicamentos" :key="med.nome" class="barra-wrap">
-                <div
-                  class="barra"
-                  :style="{ height: (med.qtd / maxEstoque) * 120 + 'px', background: med.cor }"
+          <div class="dash-grid">
+            <!-- Card 1: Dados -->
+            <div class="card card-dados">
+              <h3 class="card-title">{{ mesAtual }}</h3>
+              <div class="dado-item">
+                <span class="dado-icon">🩸</span
+                ><span
+                  >Tipo sanguíneo: <strong>{{ dadosPaciente.tipoSanguineo }}</strong></span
                 >
-                  <q-tooltip>{{ med.nome }}: {{ med.qtd }} un.</q-tooltip>
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">⚖️</span
+                ><span
+                  >Peso: <strong>{{ dadosPaciente.peso }} kg</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">🩺</span
+                ><span
+                  >Pressão arterial: <strong>{{ dadosPaciente.pressao }}</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">❤️</span
+                ><span
+                  >Frequência cardíaca: <strong>{{ dadosPaciente.frequencia }} bpm</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">🩸</span
+                ><span
+                  >Glicemia (jejum): <strong>{{ dadosPaciente.glicemia }} mg/dL</strong></span
+                >
+              </div>
+              <q-btn
+                flat
+                dense
+                class="btn-editar-dados"
+                icon="edit"
+                label="Editar"
+                @click="editarDados = true"
+              />
+            </div>
+
+            <!-- Card 2: Calendário -->
+            <div class="card card-calendario">
+              <q-date
+                v-model="dataCalendario"
+                :events="datasConsultas"
+                event-color="indigo-6"
+                flat
+                minimal
+                class="q-date-custom"
+              />
+            </div>
+
+            <!-- Card 3: Consultas -->
+            <div class="card card-consultas">
+              <h3 class="card-title">PRÓXIMAS CONSULTAS</h3>
+              <div v-for="(c, i) in consultas" :key="i" class="consulta-item">
+                <span
+                  >{{ c.data }} - {{ c.hora }}H | <strong>{{ c.medico }}</strong></span
+                >
+              </div>
+              <q-btn
+                flat
+                dense
+                class="btn-add-mini"
+                icon="add"
+                label="Nova consulta"
+                @click="dialogConsulta = true"
+              />
+            </div>
+
+            <!-- Card 4: Estoque -->
+            <div class="card card-estoque">
+              <h3 class="card-title">ESTOQUE</h3>
+              <div class="grafico-barras">
+                <div v-for="med in medicamentos" :key="med.nome" class="barra-wrap">
+                  <div
+                    class="barra"
+                    :style="{ height: (med.qtd / maxEstoque) * 120 + 'px', background: med.cor }"
+                  >
+                    <q-tooltip>{{ med.nome }}: {{ med.qtd }} un.</q-tooltip>
+                  </div>
+                  <span class="barra-label">{{ med.qtd }}</span>
                 </div>
-                <span class="barra-label">{{ med.qtd }}</span>
+              </div>
+            </div>
+
+            <!-- Card 5: Medicamentos -->
+            <div class="card card-medicamentos">
+              <div v-for="(med, i) in medicamentos" :key="i" class="med-row">
+                <span class="med-qtd">{{ med.qtd }}</span>
+                <span class="med-nome">{{ med.nome }}</span>
+              </div>
+              <q-btn
+                flat
+                dense
+                class="btn-add-mini"
+                icon="add"
+                label="Adicionar"
+                @click="dialogMed = true"
+              />
+            </div>
+
+            <!-- Card 6: Emergência -->
+            <div class="card card-emergencia">
+              <h3 class="card-title emerg-title">EMERGÊNCIA</h3>
+              <div class="emerg-btn" @click="ligar('193')">
+                <span class="emerg-icon">🧑‍🚒</span>
+                <span class="emerg-label"><strong>Bombeiros</strong></span>
+                <span class="emerg-num">193</span>
+              </div>
+              <div class="emerg-btn" @click="ligar('190')">
+                <span class="emerg-icon">👮</span>
+                <span class="emerg-label"><strong>Polícia</strong></span>
+                <span class="emerg-num">190</span>
+              </div>
+              <div class="historico-btn" @click="secao = 'historico'">
+                <q-icon name="assignment" size="28px" color="indigo-8" />
+                <span class="historico-label">HISTÓRICO</span>
               </div>
             </div>
           </div>
-
-          <!-- Card 5: Lista medicamentos -->
-          <div class="card card-medicamentos">
-            <div v-for="(med, i) in medicamentos" :key="i" class="med-row">
-              <span class="med-qtd">{{ med.qtd }}</span>
-              <span class="med-nome">{{ med.nome }}</span>
-            </div>
-            <q-btn
-              flat
-              dense
-              class="btn-add-mini"
-              icon="add"
-              label="Adicionar"
-              @click="dialogMed = true"
-            />
-          </div>
-
-          <!-- Card 6: Emergência -->
-          <div class="card card-emergencia">
-            <h3 class="card-title emerg-title">EMERGÊNCIA</h3>
-            <div class="emerg-btn" @click="ligar('193')">
-              <span class="emerg-icon">🧑‍🚒</span>
-              <span class="emerg-label"><strong>Bombeiros</strong></span>
-              <span class="emerg-num">193</span>
-            </div>
-            <div class="emerg-btn" @click="ligar('190')">
-              <span class="emerg-icon">👮</span>
-              <span class="emerg-label"><strong>Polícia</strong></span>
-              <span class="emerg-num">190</span>
-            </div>
-            <div class="historico-btn" @click="secao = 'historico'">
-              <q-icon name="assignment" size="28px" color="indigo-8" />
-              <span class="historico-label">HISTÓRICO</span>
-            </div>
-          </div>
-        </div>
+        </template>
       </q-page>
     </q-page-container>
 
@@ -327,7 +395,6 @@
 </template>
 
 <script setup>
-// ...
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -336,15 +403,35 @@ import { getUsuarioLocal, logoutMedico } from '../services/authService'
 const router = useRouter()
 const $q = useQuasar()
 
-// ── Usuário ──
 const usuario = getUsuarioLocal()
 const nomeUsuario = computed(() => usuario?.nome ?? 'Usuário')
-
-// ── Sidebar ──
 const drawer = ref(true)
 const secao = ref('dashboard')
 
-// ── Header ──
+const notifAtivas = ref(JSON.parse(localStorage.getItem('saudeDiaNotif') ?? 'true'))
+const modoEscuro = ref(JSON.parse(localStorage.getItem('saudeDiaDark') ?? 'false'))
+
+function onToggleNotif(val) {
+  localStorage.setItem('saudeDiaNotif', JSON.stringify(val))
+  $q.notify({
+    message: val ? 'Notificações ativadas' : 'Notificações desativadas',
+    icon: val ? 'notifications' : 'notifications_off',
+    color: 'indigo-7',
+    position: 'top',
+    timeout: 1500,
+  })
+}
+function onToggleModoEscuro(val) {
+  localStorage.setItem('saudeDiaDark', JSON.stringify(val))
+  $q.notify({
+    message: val ? 'Modo escuro ativado' : 'Modo claro ativado',
+    icon: val ? 'dark_mode' : 'light_mode',
+    color: 'indigo-7',
+    position: 'top',
+    timeout: 1500,
+  })
+}
+
 const notificacoes = ref(3)
 const meses = [
   'JANEIRO',
@@ -371,11 +458,9 @@ function verNotificacoes() {
   })
 }
 
-// ── Calendário ──
 const dataCalendario = ref(new Date().toISOString().substring(0, 10).replace(/-/g, '/'))
 const datasConsultas = ref(['2024/08/01', '2024/08/03', '2024/08/15', '2024/08/16'])
 
-// ── Dados do paciente ──
 const dadosPaciente = reactive(
   JSON.parse(localStorage.getItem('saudeDiaDados') || 'null') ?? {
     tipoSanguineo: 'O+',
@@ -391,7 +476,6 @@ function onSalvarDados() {
   $q.notify({ type: 'positive', message: 'Dados atualizados!', position: 'top' })
 }
 
-// ── Consultas ──
 const consultas = ref(
   JSON.parse(localStorage.getItem('saudeDiaConsultas') || 'null') ?? [
     { data: '01/08', hora: '19', medico: 'DR. PAULO' },
@@ -412,7 +496,6 @@ function onAdicionarConsulta() {
   $q.notify({ type: 'positive', message: 'Consulta adicionada!', position: 'top' })
 }
 
-// ── Medicamentos ──
 const coresBarra = ['#f87171', '#fb923c', '#facc15', '#4ade80', '#60a5fa']
 const medicamentos = ref(
   (
@@ -441,7 +524,6 @@ function onAdicionarMedicamento() {
   $q.notify({ type: 'positive', message: 'Medicamento adicionado!', position: 'top' })
 }
 
-// ── Emergência ──
 function ligar(numero) {
   $q.dialog({
     title: '📞 Confirmar ligação',
@@ -454,7 +536,6 @@ function ligar(numero) {
   })
 }
 
-// ── Logout ──
 function handleLogout() {
   $q.dialog({
     title: 'Sair',
@@ -468,7 +549,6 @@ function handleLogout() {
 }
 </script>
 
-<!-- name multi-word fix -->
 <script>
 export default { name: 'IndexPage' }
 </script>
@@ -484,7 +564,103 @@ export default { name: 'IndexPage' }
   padding: 0 16px 24px 16px;
 }
 
-/* Sidebar */
+/* ── Modo escuro ── */
+.dark-mode.dash-layout {
+  background: #1e1e2e;
+}
+.dark-mode .dash-page {
+  background: #1e1e2e;
+}
+.dark-mode .card {
+  background: rgba(40, 40, 60, 0.92) !important;
+}
+.dark-mode .card-title {
+  color: #a5b4fc !important;
+}
+.dark-mode .dado-item {
+  color: #e2e8f0 !important;
+  border-color: #2d2d4e !important;
+}
+.dark-mode .consulta-item {
+  background: #2d2d4e !important;
+  color: #e2e8f0 !important;
+}
+.dark-mode .med-row {
+  border-color: #2d2d4e !important;
+}
+.dark-mode .med-nome {
+  color: #e2e8f0 !important;
+}
+.dark-mode .med-qtd {
+  color: #a5b4fc !important;
+}
+.dark-mode .barra-label {
+  color: #e2e8f0 !important;
+}
+.dark-mode .historico-btn {
+  background: #2d2d4e !important;
+}
+.dark-mode .historico-label {
+  color: #a5b4fc !important;
+}
+.dark-mode .header-boas-vindas {
+  color: #e2e8f0;
+}
+.dark-mode .config-card {
+  background: rgba(40, 40, 60, 0.92) !important;
+}
+.dark-mode .config-label {
+  color: #e2e8f0 !important;
+}
+.dark-mode .config-icon {
+  color: #a5b4fc !important;
+}
+.dark-mode .config-title {
+  color: white !important;
+}
+
+/* Calendário — textos brancos no modo escuro */
+.dark-mode :deep(.q-date__calendar-days-row .q-date__calendar-item button) {
+  color: #e2e8f0 !important;
+}
+.dark-mode :deep(.q-date__calendar-item--out .q-date__calendar-item button) {
+  color: #6b7280 !important;
+}
+.dark-mode :deep(.q-date__navigation .q-btn) {
+  color: #e2e8f0 !important;
+}
+.dark-mode :deep(.q-date__header-title) {
+  color: white !important;
+}
+.dark-mode :deep(.q-date__years-item button) {
+  color: #e2e8f0 !important;
+}
+.dark-mode :deep(.q-date__calendar-weekdays > div) {
+  color: #a5b4fc !important;
+}
+.dark-mode :deep(.q-btn.q-date__navigation-min-btns) {
+  color: white !important;
+}
+.dark-mode :deep(.q-date .q-btn__content) {
+  color: #e2e8f0 !important;
+}
+
+/* Emergência — textos brancos no modo escuro */
+.dark-mode .emerg-btn {
+  background: #3d2020 !important;
+}
+.dark-mode .emerg-label {
+  color: #f1f5f9 !important;
+}
+.dark-mode .emerg-num {
+  background: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+.dark-mode .emerg-title {
+  color: #fca5a5 !important;
+}
+
+/* ── Sidebar ── */
 :deep(.sidebar) {
   background: #5a5fa8 !important;
   border-right: none !important;
@@ -516,7 +692,7 @@ export default { name: 'IndexPage' }
   margin: 6px 0;
 }
 
-/* Header */
+/* ── Header ── */
 .dash-header {
   display: flex;
   align-items: center;
@@ -549,15 +725,14 @@ export default { name: 'IndexPage' }
   color: white !important;
 }
 
-/* Grid */
+/* ── Grid ── */
 .dash-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
   gap: 14px;
 }
 
-/* Cards base */
+/* ── Cards ── */
 .card {
   background: rgba(255, 255, 255, 0.82);
   border-radius: 20px;
@@ -573,8 +748,6 @@ export default { name: 'IndexPage' }
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
-/* Dados */
 .card-dados {
   grid-column: 1;
   grid-row: 1;
@@ -602,7 +775,6 @@ export default { name: 'IndexPage' }
   font-size: 12px;
 }
 
-/* Calendário */
 .card-calendario {
   grid-column: 2;
   grid-row: 1;
@@ -619,7 +791,6 @@ export default { name: 'IndexPage' }
   display: none;
 }
 
-/* Consultas */
 .card-consultas {
   grid-column: 3;
   grid-row: 1;
@@ -640,7 +811,6 @@ export default { name: 'IndexPage' }
   font-size: 12px;
 }
 
-/* Estoque */
 .card-estoque {
   grid-column: 1;
   grid-row: 2;
@@ -673,7 +843,6 @@ export default { name: 'IndexPage' }
   color: #475569;
 }
 
-/* Medicamentos */
 .card-medicamentos {
   grid-column: 2;
   grid-row: 2;
@@ -700,7 +869,6 @@ export default { name: 'IndexPage' }
   letter-spacing: 0.5px;
 }
 
-/* Emergência */
 .card-emergencia {
   grid-column: 3;
   grid-row: 2;
@@ -764,7 +932,69 @@ export default { name: 'IndexPage' }
   letter-spacing: 1px;
 }
 
-/* Dialogs */
+/* ── Configurações ── */
+.config-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  min-height: 100vh;
+}
+.config-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.config-back-btn {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+}
+.config-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 3px;
+  margin: 0;
+  text-transform: uppercase;
+}
+.config-card {
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  padding: 8px 24px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 4px 18px rgba(60, 70, 160, 0.12);
+}
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.config-row:last-child {
+  border-bottom: none;
+}
+.config-row-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.config-icon {
+  color: #3730a3;
+}
+.config-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 1px;
+}
+
+/* ── Dialogs ── */
 .dialog-card {
   border-radius: 20px;
   min-width: 320px;
@@ -784,7 +1014,7 @@ export default { name: 'IndexPage' }
   font-weight: 700;
 }
 
-/* Responsivo */
+/* ── Responsivo ── */
 @media (max-width: 900px) {
   .dash-grid {
     grid-template-columns: 1fr 1fr;

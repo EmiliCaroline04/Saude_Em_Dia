@@ -1,20 +1,9 @@
-import { defineStore } from '#q-app/wrappers'
+// src/stores/index.js
+// O Quasar CLI com pinia espera que este arquivo exporte
+// uma função que retorna a instância do pinia, OU a instância diretamente.
+// O template do Quasar faz: app.use(store) onde store = export default
+// Por isso exportamos createPinia() diretamente.
+
 import { createPinia } from 'pinia'
 
-/*
- * If not building with SSR mode, you can
- * directly export the Store instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Store instance.
- */
-
-export default defineStore((/* { ssrContext } */) => {
-  const pinia = createPinia()
-
-  // You can add Pinia plugins here
-  // pinia.use(SomePiniaPlugin)
-
-  return pinia
-})
+export default createPinia()
