@@ -63,3 +63,33 @@ exports.cancelarConsulta = async (req, res) => {
 
     }
 };
+
+exports.listarProximasConsultas = async (req, res) => {
+    const idPerfil = req.headers["id-perfil"] || req.headers["id_perfil"];
+    const idPaciente = req.headers["id-paciente"] || req.headers["id_paciente"] || req.params.id_paciente;
+    const idMedico = req.headers["id-medico"] || req.headers["id_medico"];
+
+    try {
+        let consultas;
+
+        if (idPaciente && !req.params.id_paciente) {
+            consultas = await PacienteService.listarProximasConsultasPorPaciente(idPaciente);
+        } else if (idPerfil && Number(idPerfil) === 2) {
+            if (!idMedico) {
+                throw new Error("ID do médico é obrigatório para listar consultas de médico.");
+            }
+            consultas = await PacienteService.listarProximasConsultasPorMedico(idMedico);
+        } else if (req.params.id_paciente) {
+            consultas = await PacienteService.listarProximasConsultas(req.params.id_paciente);
+        } else {
+            throw new Error("Parâmetros insuficientes para listar próximas consultas.");
+        }
+
+        res.json({ message: "Próximas consultas", consultas });
+
+    } catch (error) {
+
+        res.status(500).json({ erro: error.message });
+
+    }
+};

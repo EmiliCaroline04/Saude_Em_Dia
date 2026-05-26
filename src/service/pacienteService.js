@@ -115,6 +115,73 @@ class PacienteService {
 
         return result.rows[0];
     }
+
+    static formatarConsulta(consulta, nomePessoa) {
+        const data = new Date(consulta.data_hora_agendada);
+        const dia = String(data.getDate()).padStart(2, '0');
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const ano = data.getFullYear();
+        const horas = String(data.getHours()).padStart(2, '0');
+        const minutos = String(data.getMinutes()).padStart(2, '0');
+
+        return `${dia}/${mes}/${ano} - ${horas}:${minutos} | ${consulta[nomePessoa]}`;
+    }
+
+    static async listarProximasConsultasPorPaciente(idPaciente) {
+        if (!idPaciente) {
+            throw new Error("ID do paciente é obrigatório.");
+        }
+
+        const paciente = await pool.query(
+            "SELECT * FROM paciente WHERE id_paciente = $1",
+            [idPaciente]
+        );
+
+        if (paciente.rows.length === 0) {
+            throw new Error("Paciente não encontrado.");
+        }
+
+        const result = await pool.query(
+            `SELECT a.id_agendamento, a.data_hora_agendada, m.nome AS nome_medico
+             FROM agendamento a
+             JOIN medico m ON a.id_medico = m.id_medico
+             WHERE a.id_paciente = $1
+             AND a.status = 'AGENDADO'
+             AND a.data_hora_agendada > NOW()
+             ORDER BY a.data_hora_agendada ASC`,
+            [idPaciente]
+        );
+
+        return result.rows.map(consulta => PacienteService.formatarConsulta(consulta, 'nome_medico'));
+    }
+
+    static async listarProximasConsultasPorMedico(idMedico) {
+        if (!idMedico) {
+            throw new Error("ID do médico é obrigatório.");
+        }
+
+        const medico = await pool.query(
+            "SELECT * FROM medico WHERE id_medico = $1",
+            [idMedico]
+        );
+
+        if (medico.rows.length === 0) {
+            throw new Error("Médico não encontrado.");
+        }
+
+        const result = await pool.query(
+            `SELECT a.id_agendamento, a.data_hora_agendada, p.nome AS nome_paciente
+             FROM agendamento a
+             JOIN paciente p ON a.id_paciente = p.id_paciente
+             WHERE a.id_medico = $1
+             AND a.status = 'AGENDADO'
+             AND a.data_hora_agendada > NOW()
+             ORDER BY a.data_hora_agendada ASC`,
+            [idMedico]
+        );
+
+        return result.rows.map(consulta => PacienteService.formatarConsulta(consulta, 'nome_paciente'));
+    }
 }
 
 module.exports = PacienteService;
