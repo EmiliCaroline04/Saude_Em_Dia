@@ -1,34 +1,34 @@
 <template>
-  <q-page class="welcome-page flex flex-center">
-    <div class="welcome-container">
-      <div class="logo-card">
-        <img src="../assets/Logo.png" alt="Saúde em Dia" class="logo-img" />
-      </div>
-      <h2 class="welcome-text">Bem-vindo (a)</h2>
-      <div class="button-group">
-        <q-btn label="Login" class="btn-action" unelevated @click="$router.push('/login')" />
+  <q-page class="pagina-boas-vindas flex flex-center">
+    <main class="container-boas-vindas" aria-label="Boas-vindas">
+      <figure class="cartao-logo">
+        <img src="../assets/Logo.png" alt="Logo Saúde em Dia" class="imagem-logo" />
+      </figure>
+      <h1 class="texto-boas-vindas">Bem-vindo(a)</h1>
+      <nav class="grupo-botoes" aria-label="Ações principais">
+        <q-btn label="Entrar" class="botao-acao" unelevated @click="$router.push('/login')" />
         <q-btn
           label="Cadastre-se"
-          class="btn-action"
+          class="botao-acao"
           unelevated
-          @click="$router.push('/cadastro')"
+          @click="$router.push('/cadastro-med')"
         />
-      </div>
-    </div>
+      </nav>
+    </main>
   </q-page>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-export default defineComponent({ name: 'BemVindoPage' })
+export default defineComponent({ name: 'PaginaBoasVindas' })
 </script>
 
 <style scoped>
-.welcome-page {
+.pagina-boas-vindas {
   background-color: #7b7fc4;
   min-height: 100vh;
 }
-.welcome-container {
+.container-boas-vindas {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,7 +37,7 @@ export default defineComponent({ name: 'BemVindoPage' })
   width: 100%;
   max-width: 400px;
 }
-.logo-card {
+.cartao-logo {
   background: white;
   border-radius: 16px;
   padding: 24px 40px;
@@ -46,24 +46,25 @@ export default defineComponent({ name: 'BemVindoPage' })
   justify-content: center;
   width: 100%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 0;
 }
-.logo-img {
+.imagem-logo {
   max-width: 220px;
   height: auto;
 }
-.welcome-text {
+.texto-boas-vindas {
   color: white;
   font-size: 1.6rem;
   font-weight: 400;
   margin: 0;
 }
-.button-group {
+.grupo-botoes {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 60%;
 }
-.btn-action {
+.botao-acao {
   background: white !important;
   color: #333 !important;
   border-radius: 8px !important;

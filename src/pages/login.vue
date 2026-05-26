@@ -1,38 +1,34 @@
 <template>
   <q-page class="login-page">
-    <div class="login-layout">
-      <!-- Lado esquerdo - imagem do idoso -->
-      <div class="left-side">
-        <img src="../assets/Login.png" alt="Ilustração" class="login-img" />
-      </div>
-
-      <!-- Lado direito - formulário -->
-      <div class="right-side">
-        <div class="logo-area">
-          <img src="../assets/Logo.png" alt="Saúde em Dia" class="logo-img" />
-        </div>
-
-        <h2 class="login-title">LOGIN</h2>
-
-        <q-form @submit="handleLogin" class="form-area">
+    <main class="login-layout" aria-label="Página de login">
+      <aside class="lado-imagem" aria-label="Ilustração de login">
+        <img src="../assets/Login.png" alt="Ilustração de idoso" class="login-img" />
+      </aside>
+      <section class="lado-formulario" aria-label="Formulário de login">
+        <header class="area-logo">
+          <img src="../assets/Logo.png" alt="Logo Saúde em Dia" class="logo-img" />
+        </header>
+        <h1 class="titulo-login">Login</h1>
+        <q-form @submit="handleLogin" class="formulario-login">
           <q-input
             v-model="form.cpf"
             placeholder="CPF"
             outlined
             dense
-            class="input-field"
+            class="campo-input"
             mask="###.###.###-##"
             bg-color="white"
+            aria-label="CPF"
           />
-
           <q-input
             v-model="form.senha"
             placeholder="Senha"
             outlined
             dense
-            class="input-field"
+            class="campo-input"
             :type="showSenha ? 'text' : 'password'"
             bg-color="white"
+            aria-label="Senha"
           >
             <template #append>
               <q-icon
@@ -42,45 +38,33 @@
               />
             </template>
           </q-input>
-
-          <div class="esqueceu-senha" @click="$router.push('/esqueceu-senha')">
-            Esqueceu a senha?
-          </div>
-
-          <q-btn label="Entrar" type="submit" class="btn-entrar" unelevated :loading="loading" />
+          <div class="esqueceu-senha">Esqueceu a senha?</div>
+          <q-btn label="Entrar" type="submit" class="botao-entrar" unelevated :loading="loading" />
         </q-form>
-
-        <div class="criar-conta">
+        <footer class="area-criar-conta">
           Não tem uma conta?
-          <span class="link-criar" @click="$router.push('/cadastro')">Crie agora...</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rodapé governo -->
-    <div class="footer-logos">
-      <img src="../assets/governo.png" alt="Logos Governo" class="footer-gov-img" />
-    </div>
+          <span class="link-criar" @click="$router.push('/cadastro-med')">Crie agora...</span>
+        </footer>
+      </section>
+    </main>
+    <footer class="footer-logos" aria-label="Logos do governo">
+      <img src="../assets/governo.png" alt="Logos Governo Federal" class="footer-gov-img" />
+    </footer>
   </q-page>
 </template>
 
 <script>
 import { defineComponent, ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../router/authStore'
+import { loginMedico } from '../services/authService'
 
 export default defineComponent({
-  name: 'LoginPage',
+  name: 'PaginaLogin',
   setup() {
     const router = useRouter()
-    const authStore = useAuthStore()
     const loading = ref(false)
     const showSenha = ref(false)
-
-    const form = reactive({
-      cpf: '',
-      senha: '',
-    })
+    const form = reactive({ cpf: '', senha: '' })
 
     async function handleLogin() {
       if (!form.cpf || !form.senha) {
@@ -89,10 +73,14 @@ export default defineComponent({
       }
       loading.value = true
       try {
-        await authStore.login(form.cpf, form.senha)
-        router.push('/home')
+        const resultado = await loginMedico(form.cpf, form.senha)
+        if (resultado.sucesso) {
+          router.push('/home')
+        } else {
+          alert(resultado.erro || 'CPF ou senha inválidos.')
+        }
       } catch {
-        alert('CPF ou senha inválidos.')
+        alert('Erro inesperado. Tente novamente.')
       } finally {
         loading.value = false
       }
@@ -110,7 +98,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
 }
-
 .login-layout {
   display: flex;
   flex: 1;
@@ -118,91 +105,65 @@ export default defineComponent({
   justify-content: center;
   gap: 80px;
   padding: 40px 0 0 0;
-  margin-bottom: 0;
 }
-
-/* Lado esquerdo */
-.left-side {
+.lado-imagem {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   min-width: 420px;
 }
-
 .login-img {
   max-width: 200%;
   max-height: 600px;
   object-fit: contain;
-  margin-left: var(--login-img-margin-left, 0px);
-  margin-top: var(--login-img-margin-top, 0px);
 }
-
-.left-side {
-  /* Define as variáveis CSS apenas para o escopo do componente */
-  --login-img-margin-left: 40px;
-  --login-img-margin-top: 30px;
-}
-
-/* Lado direito */
-.right-side {
+.lado-formulario {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-width: 4px;
   max-width: 420px;
+  width: 100%;
 }
-
-/* .logo-area {
-  background: white;
-  border-radius: 12px;
-  padding: 16px 32px;
+.area-logo {
   margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  width: 40%;
   display: flex;
   justify-content: center;
-} */
-
+  width: 100%;
+}
 .logo-img {
   height: 150px;
   border-radius: 12px;
 }
-
-.login-title {
+.titulo-login {
   color: #1a1a1a;
   font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 4px;
   margin: 0 0 20px 0;
   text-align: center;
+  width: 100%;
 }
-
-.form-area {
+.formulario-login {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
-.input-field {
+.campo-input {
   border-radius: 8px;
   width: 100%;
 }
-
 .esqueceu-senha {
   color: #1a1a6e;
   font-size: 0.85rem;
   cursor: pointer;
-  text-align: left;
   text-decoration: underline;
   margin-top: -4px;
 }
-
 .esqueceu-senha:hover {
   opacity: 0.7;
 }
-
-.btn-entrar {
+.botao-entrar {
   background: #1a1a6e !important;
   color: white !important;
   border-radius: 8px !important;
@@ -213,41 +174,32 @@ export default defineComponent({
   width: 100%;
   margin-top: 4px;
 }
-
-.criar-conta {
+.area-criar-conta {
   color: #1a1a1a;
   margin-top: 16px;
   font-size: 0.88rem;
   text-align: center;
+  width: 100%;
 }
-
 .link-criar {
   color: #1a1a6e;
   cursor: pointer;
   text-decoration: underline;
   font-weight: 700;
 }
-
 .link-criar:hover {
   opacity: 0.7;
 }
-
-/* Rodapé */
 .footer-logos {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0px 60px;
+  padding: 0 60px;
   background: rgba(0, 0, 0, 0.08);
-  margin-bottom: 0px;
 }
-
 .footer-gov-img {
   height: 120px;
   object-fit: contain;
-  margin-left: var(--footer-gov-img-margin-left, 60);
-}
-:root {
-  --footer-gov-img-margin-left: 300px;
+  margin-left: 300px;
 }
 </style>
