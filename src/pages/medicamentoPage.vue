@@ -68,15 +68,99 @@
               <span class="pill-emoji">💊</span>
             </div>
 
-            <!-- Botão alarme → /alarme?id=&nome= -->
-            <div class="clock-wrap" @click="irParaAlarme(med)" title="Gerenciar alarmes">
+            <!-- Botão alarme com popup -->
+            <div class="clock-wrap" title="Gerenciar alarmes">
               <q-icon name="alarm" size="26px" color="white" />
               <span v-if="alarmesDo(med.id).length" class="clock-badge">
                 {{ alarmesDo(med.id).length }}
               </span>
               <span v-else-if="med.horarioInicio" class="clock-hora">{{ med.horarioInicio }}</span>
-            </div>
 
+              <q-menu
+                anchor="bottom middle"
+                self="top middle"
+                style="border-radius: 16px; min-width: 300px"
+              >
+                <div class="alarm-popup">
+                  <!-- Cabeçalho -->
+                  <div class="alarm-popup-header">
+                    <q-icon name="alarm" size="18px" color="white" />
+                    <span>Alarmes · {{ med.nome.toUpperCase() }}</span>
+                  </div>
+
+                  <!-- Lista de alarmes -->
+                  <div v-if="!alarmesDo(med.id).length" class="alarm-popup-vazio">
+                    <q-icon name="alarm_off" size="32px" color="#94a3b8" />
+                    <span>Nenhum alarme cadastrado</span>
+                  </div>
+
+                  <div
+                    v-for="(al, idx) in alarmesDo(med.id)"
+                    :key="al.id"
+                    class="alarm-popup-item"
+                    :class="{ 'alarm-inativo': !al.ativo }"
+                  >
+                    <div class="alarm-popup-hora">{{ al.hora }}</div>
+                    <div class="alarm-popup-info">
+                      <span class="alarm-popup-label">{{ al.label || 'Tomar medicamento' }}</span>
+                      <div class="alarm-popup-dias">
+                        <span
+                          v-for="dia in diasSemana"
+                          :key="dia.sigla"
+                          class="ap-dia"
+                          :class="{ 'ap-dia-on': al.dias?.includes(dia.sigla) }"
+                          >{{ dia.abrev }}</span
+                        >
+                      </div>
+                    </div>
+                    <div class="alarm-popup-acoes">
+                      <!-- Toggle ativo/inativo -->
+                      <q-toggle
+                        :model-value="al.ativo"
+                        color="indigo-6"
+                        size="36px"
+                        @update:model-value="(val) => toggleAlarmeAtivo(med.id, idx, val)"
+                      />
+                      <!-- Editar -->
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="edit"
+                        color="indigo-5"
+                        size="sm"
+                        @click.stop="abrirEdicaoAlarme(med, idx)"
+                      >
+                        <q-tooltip>Editar</q-tooltip>
+                      </q-btn>
+                      <!-- Excluir -->
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="delete"
+                        color="red-4"
+                        size="sm"
+                        @click.stop="excluirAlarmeInline(med.id, idx)"
+                      >
+                        <q-tooltip>Excluir</q-tooltip>
+                      </q-btn>
+                    </div>
+                  </div>
+
+                  <!-- Botão novo alarme -->
+                  <div class="alarm-popup-footer">
+                    <q-btn
+                      unelevated
+                      label="NOVO ALARME"
+                      icon="add_alarm"
+                      class="btn-popup-novo"
+                      @click.stop="irParaAlarme(med)"
+                    />
+                  </div>
+                </div>
+              </q-menu>
+            </div>
             <!-- Badge estoque -->
             <div
               class="status-chip"
@@ -264,14 +348,21 @@ export default { name: 'MedicamentoPage' }
 </script>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useMedicamentoStore } from '../stores/medicamentoStore'
 
 const $q = useQuasar()
 const store = useMedicamentoStore()
 const router = useRouter()
+const route = useRoute()
+
+onMounted(() => {
+  if (route.query.novo === '1') {
+    abrirNovo()
+  }
+})
 
 const diasSemana = [
   { sigla: 'dom', abrev: 'Dom' },
@@ -290,7 +381,7 @@ function alarmesDo(medId) {
     return []
   }
 }
-
+alarmesDo
 function irParaAlarme(med) {
   router.push({ path: '/alarme', query: { id: med.id, nome: med.nome } })
 }
@@ -426,6 +517,102 @@ function excluir(id) {
 .med-vazio-sub {
   font-size: 13px;
   opacity: 0.7;
+}
+/* ══ Alarm Popup ══ */
+.alarm-popup {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Nunito', sans-serif;
+  overflow: hidden;
+}
+.alarm-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #6366f1;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+}
+.alarm-popup-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 16px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+.alarm-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+.alarm-popup-item:hover {
+  background: #f8faff;
+}
+.alarm-popup-item.alarm-inativo {
+  opacity: 0.45;
+}
+.alarm-popup-hora {
+  font-size: 22px;
+  font-weight: 900;
+  color: #3730a3;
+  min-width: 58px;
+}
+.alarm-popup-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.alarm-popup-label {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+}
+.alarm-popup-dias {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.ap-dia {
+  font-size: 10px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #94a3b8;
+  border-radius: 5px;
+  padding: 1px 4px;
+}
+.ap-dia-on {
+  background: #6366f1;
+  color: white;
+}
+.alarm-popup-acoes {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.alarm-popup-footer {
+  padding: 10px 14px;
+  display: flex;
+  justify-content: center;
+  background: #f8faff;
+}
+.btn-popup-novo {
+  background: #6366f1 !important;
+  color: white !important;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 12px;
+  padding: 6px 20px;
+  letter-spacing: 0.5px;
+  width: 100%;
 }
 
 /* Card */

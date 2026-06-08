@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 export default defineConfig((ctx) => {
   return {
     // Sem boot extra — Pinia registrado via stores/index.js
-    boot: [],
+    boot: ['notificacoes'],
 
     css: ['app.scss'],
 
