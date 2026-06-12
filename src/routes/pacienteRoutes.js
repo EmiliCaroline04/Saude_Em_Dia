@@ -5,6 +5,7 @@ const pacienteController = require("../controllers/pacienteController");
 
 router.post("/", pacienteController.criarPaciente);
 router.get("/", pacienteController.listarPacientes);
+router.put("/:id_paciente", pacienteController.editarPaciente);
 router.post("/:id_paciente/agendar", pacienteController.agendarConsulta);
 router.put("/:id_paciente/cancelar/:id_agendamento", pacienteController.cancelarConsulta);
 router.get("/proximas-consultas", pacienteController.listarProximasConsultas);

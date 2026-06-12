@@ -27,6 +27,58 @@ class PacienteService {
         return result.rows;
     }
 
+    static async editarPaciente(idPaciente, dados, idPerfil, idPacienteSolicitante) {
+        if (!idPaciente) {
+            throw new Error("ID do paciente é obrigatório.");
+        }
+
+        if (!dados || Object.keys(dados).length === 0) {
+            throw new Error("Nenhum dado foi informado para atualização.");
+        }
+
+        const perfil = Number(idPerfil);
+        const isAdmin = perfil === 1;
+        const isSelf = String(idPacienteSolicitante) === String(idPaciente);
+
+        if (!isAdmin && !isSelf) {
+            throw new Error("Acesso negado. Apenas administradores ou o próprio paciente podem editar este cadastro.");
+        }
+
+        const pacienteExistente = await pool.query(
+            "SELECT * FROM paciente WHERE id_paciente = $1",
+            [idPaciente]
+        );
+
+        if (pacienteExistente.rows.length === 0) {
+            throw new Error("Paciente não encontrado.");
+        }
+
+        const camposPermitidos = ["nome", "cpf", "endereco", "telefone", "sexo", "data_nascimento"];
+        const atualizacoes = [];
+        const valores = [idPaciente];
+
+        camposPermitidos.forEach((campo) => {
+            if (dados[campo] !== undefined) {
+                atualizacoes.push(`${campo} = $${valores.length + 1}`);
+                valores.push(dados[campo]);
+            }
+        });
+
+        if (atualizacoes.length === 0) {
+            throw new Error("Nenhum campo válido foi informado para atualização.");
+        }
+
+        const result = await pool.query(
+            `UPDATE paciente
+             SET ${atualizacoes.join(", ")}
+             WHERE id_paciente = $1
+             RETURNING *`,
+            valores
+        );
+
+        return result.rows[0];
+    }
+
     static async agendarConsulta(dados, idPaciente) {
         const { id_medico, data_hora_agendada, motivo_consulta } = dados;
 
@@ -127,6 +179,7 @@ class PacienteService {
         return `${dia}/${mes}/${ano} - ${horas}:${minutos} | ${consulta[nomePessoa]}`;
     }
 
+    // Tela 4 do FIGMA: Na secao "PROXIMAS CONSULTAS", traz a data/horario e nome do medico(s) formatados
     static async listarProximasConsultasPorPaciente(idPaciente) {
         if (!idPaciente) {
             throw new Error("ID do paciente é obrigatório.");

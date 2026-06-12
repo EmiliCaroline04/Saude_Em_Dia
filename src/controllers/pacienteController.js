@@ -32,6 +32,26 @@ exports.listarPacientes = async (req, res) => {
 
 };
 
+exports.editarPaciente = async (req, res) => {
+    const { id_paciente } = req.params;
+    const dados = req.body;
+    const idPerfil = req.headers["id-perfil"] || req.headers["id_perfil"];
+    const idPacienteSolicitante = req.headers["id-paciente"] || req.headers["id_paciente"];
+
+    try {
+        const paciente = await PacienteService.editarPaciente(id_paciente, dados, idPerfil, idPacienteSolicitante);
+
+        res.json({ message: "Paciente atualizado com sucesso!", paciente });
+
+    } catch (error) {
+        if (error.message.includes("Acesso negado")) {
+            res.status(403).json({ erro: error.message });
+        } else {
+            res.status(500).json({ erro: error.message });
+        }
+    }
+};
+
 exports.agendarConsulta = async (req, res) => {
     const dados = req.body;
     const { id_paciente } = req.params;
