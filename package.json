@@ -1,9 +1,9 @@
 {
   "name": "app_saude_em_dia",
   "version": "1.0.0",
-  "main": "backend/src/server.js",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon backend/src/server.js"
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
