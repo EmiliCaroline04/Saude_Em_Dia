@@ -1,0 +1,1101 @@
+<template>
+  <q-layout view="lHh lpR fFf" :class="['dash-layout', modoEscuro ? 'dark-mode' : '']">
+    <!-- ── SIDEBAR ESQUERDA ── -->
+    <q-drawer v-model="drawer" :width="72" :breakpoint="600" show-if-above class="sidebar">
+      <div class="sidebar-inner">
+        <q-btn flat round class="nav-btn" @click="handleLogout">
+          <q-icon name="logout" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Sair</q-tooltip>
+        </q-btn>
+
+        <div class="nav-divider" />
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'dashboard' ? 'active' : '']"
+          @click="secao = 'dashboard'"
+        >
+          <q-icon name="dashboard" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Dashboard</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'pacientes' ? 'active' : '']"
+          @click="secao = 'pacientes'"
+        >
+          <q-icon name="person" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Pacientes</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'agenda' ? 'active' : '']"
+          @click="secao = 'agenda'"
+        >
+          <q-icon name="event" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Agenda</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'lembretes' ? 'active' : '']"
+          @click="secao = 'lembretes'"
+        >
+          <q-icon name="alarm" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]">Lembretes</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'medicamentos' ? 'active' : '']"
+          @click="router.push('/cadastro-medicamento')"
+        >
+          <q-icon name="medication" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
+            >Medicamentos</q-tooltip
+          >
+        </q-btn>
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'emergencia' ? 'active' : '']"
+          @click="router.push('/emergencia')"
+        >
+          <q-icon name="local_phone" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
+            >Emergência</q-tooltip
+          >
+        </q-btn>
+
+        <div class="nav-divider" />
+
+        <q-btn
+          flat
+          round
+          :class="['nav-btn', secao === 'configuracoes' ? 'active' : '']"
+          @click="secao = 'configuracoes'"
+        >
+          <q-icon name="settings" size="22px" />
+          <q-tooltip anchor="center right" self="center left" :offset="[8, 0]"
+            >Configurações</q-tooltip
+          >
+        </q-btn>
+      </div>
+    </q-drawer>
+
+    <!-- ── CONTEÚDO PRINCIPAL ── -->
+    <q-page-container>
+      <q-page class="dash-page">
+        <!-- ═══════════════ CONFIGURAÇÕES ═══════════════ -->
+        <div v-if="secao === 'configuracoes'" class="config-page">
+          <div class="config-header">
+            <q-btn flat round class="config-back-btn" @click="secao = 'dashboard'">
+              <q-icon name="arrow_back" size="22px" />
+            </q-btn>
+            <h2 class="config-title">CONFIGURAÇÕES</h2>
+          </div>
+          <div class="config-card">
+            <div class="config-row">
+              <div class="config-row-left">
+                <q-icon name="notifications" size="28px" class="config-icon" />
+                <span class="config-label">NOTIFICAÇÕES</span>
+              </div>
+              <q-toggle
+                v-model="notifAtivas"
+                color="blue-6"
+                size="56px"
+                @update:model-value="onToggleNotif"
+              />
+            </div>
+            <div class="config-row">
+              <div class="config-row-left">
+                <q-icon name="dark_mode" size="28px" class="config-icon" />
+                <span class="config-label">Modo Escuro</span>
+              </div>
+              <q-toggle
+                v-model="modoEscuro"
+                color="blue-6"
+                size="56px"
+                @update:model-value="onToggleModoEscuro"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════ DASHBOARD ═══════════════ -->
+        <template v-else>
+          <div class="dash-header">
+            <div class="header-left">
+              <span class="header-mes">{{ mesAtual }}</span>
+            </div>
+            <div class="header-right">
+              <span class="header-boas-vindas">Bem-vindo (a) {{ nomeUsuario }}</span>
+              <q-avatar size="44px" class="header-avatar">
+                <q-icon name="person" size="26px" color="white" />
+              </q-avatar>
+              <q-btn v-if="notifAtivas" flat round class="notif-btn" @click="verNotificacoes">
+                <q-badge color="red" floating>{{ notificacoes }}</q-badge>
+                <q-icon name="notifications" size="26px" color="white" />
+              </q-btn>
+              <q-btn v-else flat round class="notif-btn" disabled>
+                <q-icon name="notifications_off" size="26px" color="rgba(255,255,255,0.35)" />
+              </q-btn>
+            </div>
+          </div>
+
+          <div class="dash-grid">
+            <!-- Card 1: Dados -->
+            <div class="card card-dados">
+              <h3 class="card-title">{{ mesAtual }}</h3>
+              <div class="dado-item">
+                <span class="dado-icon">🩸</span
+                ><span
+                  >Tipo sanguíneo: <strong>{{ dadosPaciente.tipoSanguineo }}</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">⚖️</span
+                ><span
+                  >Peso: <strong>{{ dadosPaciente.peso }} kg</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">🩺</span
+                ><span
+                  >Pressão arterial: <strong>{{ dadosPaciente.pressao }}</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">❤️</span
+                ><span
+                  >Frequência cardíaca: <strong>{{ dadosPaciente.frequencia }} bpm</strong></span
+                >
+              </div>
+              <div class="dado-item">
+                <span class="dado-icon">🩸</span
+                ><span
+                  >Glicemia (jejum): <strong>{{ dadosPaciente.glicemia }} mg/dL</strong></span
+                >
+              </div>
+              <q-btn
+                flat
+                dense
+                class="btn-editar-dados"
+                icon="edit"
+                label="Editar"
+                @click="editarDados = true"
+              />
+            </div>
+
+            <!-- Card 2: Calendário -->
+            <div class="card card-calendario">
+              <q-date
+                v-model="dataCalendario"
+                :events="datasConsultas"
+                event-color="indigo-6"
+                flat
+                minimal
+                class="q-date-custom"
+              />
+            </div>
+
+            <!-- Card 3: Consultas -->
+            <div class="card card-consultas">
+              <h3 class="card-title">PRÓXIMAS CONSULTAS</h3>
+              <div v-for="(c, i) in consultas" :key="i" class="consulta-item">
+                <span
+                  >{{ c.data }} - {{ c.hora }}H | <strong>{{ c.medico }}</strong></span
+                >
+              </div>
+              <q-btn
+                flat
+                dense
+                class="btn-add-mini"
+                icon="add"
+                label="Nova consulta"
+                @click="dialogConsulta = true"
+              />
+            </div>
+
+            <!-- Card 4: Estoque -->
+            <div class="card card-estoque">
+              <h3 class="card-title">ESTOQUE</h3>
+              <div class="grafico-barras">
+                <div v-for="med in medicamentos" :key="med.nome" class="barra-wrap">
+                  <div
+                    class="barra"
+                    :style="{ height: (med.qtd / maxEstoque) * 120 + 'px', background: med.cor }"
+                  >
+                    <q-tooltip>{{ med.nome }}: {{ med.qtd }} un.</q-tooltip>
+                  </div>
+                  <span class="barra-label">{{ med.qtd }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5: Medicamentos -->
+            <div class="card card-medicamentos">
+              <div v-for="(med, i) in medicamentos" :key="i" class="med-row">
+                <span class="med-qtd">{{ med.qtd }}</span>
+                <span class="med-nome">{{ med.nome }}</span>
+              </div>
+              <q-btn
+                flat
+                dense
+                class="btn-add-mini"
+                icon="add"
+                label="Adicionar"
+                @click="dialogMed = true"
+              />
+            </div>
+
+            <!-- Card 6: Emergência -->
+            <div class="card card-emergencia">
+              <h3 class="card-title emerg-title">EMERGÊNCIA</h3>
+              <div class="emerg-btn" @click="ligar('193')">
+                <span class="emerg-icon">🧑‍🚒</span>
+                <span class="emerg-label"><strong>Bombeiros</strong></span>
+                <span class="emerg-num">193</span>
+              </div>
+              <div class="emerg-btn" @click="ligar('190')">
+                <span class="emerg-icon">👮</span>
+                <span class="emerg-label"><strong>Polícia</strong></span>
+                <span class="emerg-num">190</span>
+              </div>
+              <div class="historico-btn" @click="secao = 'historico'">
+                <q-icon name="assignment" size="28px" color="indigo-8" />
+                <span class="historico-label">HISTÓRICO</span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </q-page>
+    </q-page-container>
+
+    <!-- Dialog: Editar Dados -->
+    <q-dialog v-model="editarDados">
+      <q-card class="dialog-card">
+        <q-card-section><h3 class="dialog-title">Editar Dados</h3></q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-input
+            v-model="dadosPaciente.tipoSanguineo"
+            label="Tipo sanguíneo"
+            outlined
+            dense
+            class="q-mb-sm"
+          />
+          <q-input
+            v-model="dadosPaciente.peso"
+            label="Peso (kg)"
+            outlined
+            dense
+            class="q-mb-sm"
+            type="number"
+          />
+          <q-input
+            v-model="dadosPaciente.pressao"
+            label="Pressão arterial"
+            outlined
+            dense
+            class="q-mb-sm"
+          />
+          <q-input
+            v-model="dadosPaciente.frequencia"
+            label="Freq. cardíaca (bpm)"
+            outlined
+            dense
+            class="q-mb-sm"
+            type="number"
+          />
+          <q-input
+            v-model="dadosPaciente.glicemia"
+            label="Glicemia (mg/dL)"
+            outlined
+            dense
+            type="number"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" v-close-popup />
+          <q-btn
+            unelevated
+            label="Salvar"
+            class="btn-salvar"
+            v-close-popup
+            @click="onSalvarDados"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialog: Nova Consulta -->
+    <q-dialog v-model="dialogConsulta">
+      <q-card class="dialog-card">
+        <q-card-section><h3 class="dialog-title">Nova Consulta</h3></q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-input
+            v-model="novaConsulta.data"
+            label="Data (DD/MM)"
+            outlined
+            dense
+            class="q-mb-sm"
+            mask="##/##"
+          />
+          <q-input
+            v-model="novaConsulta.hora"
+            label="Hora"
+            outlined
+            dense
+            class="q-mb-sm"
+            mask="##:##"
+          />
+          <q-input v-model="novaConsulta.medico" label="Médico" outlined dense />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" v-close-popup />
+          <q-btn
+            unelevated
+            label="Adicionar"
+            class="btn-salvar"
+            v-close-popup
+            @click="onAdicionarConsulta"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialog: Novo Medicamento -->
+    <q-dialog v-model="dialogMed">
+      <q-card class="dialog-card">
+        <q-card-section><h3 class="dialog-title">Novo Medicamento</h3></q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-input v-model="novoMed.nome" label="Nome" outlined dense class="q-mb-sm" />
+          <q-input v-model="novoMed.qtd" label="Quantidade" outlined dense type="number" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" v-close-popup />
+          <q-btn
+            unelevated
+            label="Adicionar"
+            class="btn-salvar"
+            v-close-popup
+            @click="onAdicionarMedicamento"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-layout>
+</template>
+
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { getUsuarioLocal, logoutMedico } from '../services/authService'
+import {
+  criarSinalVital,
+  atualizarSinalVital,
+  getPacienteIdAtual,
+  obterUltimoSinalVital,
+  salvarPacienteIdNoStorage,
+} from '../services/vitaisService'
+
+const router = useRouter()
+const $q = useQuasar()
+
+const usuario = getUsuarioLocal()
+const nomeUsuario = computed(() => usuario?.nome ?? 'Usuário')
+const drawer = ref(true)
+const secao = ref('dashboard')
+
+const notifAtivas = ref(JSON.parse(localStorage.getItem('saudeDiaNotif') ?? 'true'))
+const modoEscuro = ref(JSON.parse(localStorage.getItem('saudeDiaDark') ?? 'false'))
+
+function onToggleNotif(val) {
+  localStorage.setItem('saudeDiaNotif', JSON.stringify(val))
+  $q.notify({
+    message: val ? 'Notificações ativadas' : 'Notificações desativadas',
+    icon: val ? 'notifications' : 'notifications_off',
+    color: 'indigo-7',
+    position: 'top',
+    timeout: 1500,
+  })
+}
+function onToggleModoEscuro(val) {
+  localStorage.setItem('saudeDiaDark', JSON.stringify(val))
+  $q.notify({
+    message: val ? 'Modo escuro ativado' : 'Modo claro ativado',
+    icon: val ? 'dark_mode' : 'light_mode',
+    color: 'indigo-7',
+    position: 'top',
+    timeout: 1500,
+  })
+}
+
+const notificacoes = ref(3)
+const meses = [
+  'JANEIRO',
+  'FEVEREIRO',
+  'MARÇO',
+  'ABRIL',
+  'MAIO',
+  'JUNHO',
+  'JULHO',
+  'AGOSTO',
+  'SETEMBRO',
+  'OUTUBRO',
+  'NOVEMBRO',
+  'DEZEMBRO',
+]
+const mesAtual = meses[new Date().getMonth()]
+
+function verNotificacoes() {
+  $q.notify({
+    message: `Você tem ${notificacoes.value} notificações pendentes.`,
+    icon: 'notifications',
+    color: 'indigo-7',
+    position: 'top',
+  })
+}
+
+const dataCalendario = ref(new Date().toISOString().substring(0, 10).replace(/-/g, '/'))
+const datasConsultas = ref(['2024/08/01', '2024/08/03', '2024/08/15', '2024/08/16'])
+
+const dadosPaciente = reactive({
+  tipoSanguineo: '',
+  peso: '',
+  pressao: '',
+  frequencia: '',
+  glicemia: '',
+  idSinalVital: null,
+})
+const editarDados = ref(false)
+
+async function carregarSinaisVitais() {
+  try {
+    const idPaciente = getPacienteIdAtual()
+    salvarPacienteIdNoStorage(idPaciente)
+    const sinal = await obterUltimoSinalVital(idPaciente)
+
+    if (sinal) {
+      dadosPaciente.idSinalVital = sinal.id_sinal_vital
+      dadosPaciente.tipoSanguineo = sinal.tipo_sanguineo || 'O+'
+      dadosPaciente.peso = sinal.peso ?? ''
+      dadosPaciente.pressao = sinal.pressao_arterial ?? ''
+      dadosPaciente.frequencia = sinal.frequencia_cardiaca ?? ''
+      dadosPaciente.glicemia = sinal.glicemia_jejum ?? ''
+    }
+  } catch (error) {
+    $q.notify({ type: 'negative', message: error.message, position: 'top' })
+  }
+}
+
+onMounted(() => {
+  carregarSinaisVitais()
+})
+
+async function onSalvarDados() {
+  try {
+    const idPaciente = getPacienteIdAtual()
+    const payload = {
+      id_paciente: idPaciente,
+      peso: dadosPaciente.peso === '' ? null : Number(dadosPaciente.peso),
+      pressao_arterial: dadosPaciente.pressao,
+      frequencia_cardiaca: dadosPaciente.frequencia === '' ? null : Number(dadosPaciente.frequencia),
+      glicemia_jejum: dadosPaciente.glicemia === '' ? null : Number(dadosPaciente.glicemia),
+      data_medicao: new Date().toISOString().split('T')[0],
+    }
+
+    if (dadosPaciente.idSinalVital) {
+      await atualizarSinalVital(dadosPaciente.idSinalVital, payload)
+    } else {
+      const criado = await criarSinalVital(payload)
+      dadosPaciente.idSinalVital = criado.id_sinal_vital
+    }
+
+    localStorage.setItem('saudeDiaDados', JSON.stringify({
+      tipoSanguineo: dadosPaciente.tipoSanguineo,
+      peso: dadosPaciente.peso,
+      pressao: dadosPaciente.pressao,
+      frequencia: dadosPaciente.frequencia,
+      glicemia: dadosPaciente.glicemia,
+    }))
+
+    $q.notify({ type: 'positive', message: 'Dados atualizados!', position: 'top' })
+  } catch (error) {
+    $q.notify({ type: 'negative', message: error.message, position: 'top' })
+  }
+}
+
+const consultas = ref(
+  JSON.parse(localStorage.getItem('saudeDiaConsultas') || 'null') ?? [
+    { data: '01/08', hora: '19', medico: 'DR. PAULO' },
+    { data: '03/08', hora: '19', medico: 'DR. FELIPE' },
+    { data: '15/08', hora: '20', medico: 'DRA. LARISSA' },
+    { data: '16/08', hora: '20', medico: 'DRA. ANDRESSA' },
+  ],
+)
+const dialogConsulta = ref(false)
+const novaConsulta = reactive({ data: '', hora: '', medico: '' })
+function onAdicionarConsulta() {
+  if (!novaConsulta.data || !novaConsulta.medico) return
+  consultas.value.push({ ...novaConsulta })
+  localStorage.setItem('saudeDiaConsultas', JSON.stringify(consultas.value))
+  novaConsulta.data = ''
+  novaConsulta.hora = ''
+  novaConsulta.medico = ''
+  $q.notify({ type: 'positive', message: 'Consulta adicionada!', position: 'top' })
+}
+
+const coresBarra = ['#f87171', '#fb923c', '#facc15', '#4ade80', '#60a5fa']
+const medicamentos = ref(
+  (
+    JSON.parse(localStorage.getItem('saudeDiaMeds') || 'null') ?? [
+      { nome: 'AMITRIPTILINA', qtd: 8 },
+      { nome: 'LOSARTANA', qtd: 5 },
+      { nome: 'SINVASTATINA', qtd: 4 },
+      { nome: 'CLONAZEPAM', qtd: 10 },
+      { nome: 'ENALAPRIL', qtd: 2 },
+    ]
+  ).map((m, i) => ({ ...m, cor: coresBarra[i % coresBarra.length] })),
+)
+const maxEstoque = computed(() => Math.max(...medicamentos.value.map((m) => m.qtd), 1))
+const dialogMed = ref(false)
+const novoMed = reactive({ nome: '', qtd: 0 })
+function onAdicionarMedicamento() {
+  if (!novoMed.nome) return
+  const cor = coresBarra[medicamentos.value.length % coresBarra.length]
+  medicamentos.value.push({ nome: novoMed.nome.toUpperCase(), qtd: Number(novoMed.qtd), cor })
+  localStorage.setItem(
+    'saudeDiaMeds',
+    JSON.stringify(medicamentos.value.map(({ nome, qtd }) => ({ nome, qtd }))),
+  )
+  novoMed.nome = ''
+  novoMed.qtd = 0
+  $q.notify({ type: 'positive', message: 'Medicamento adicionado!', position: 'top' })
+}
+
+function ligar(numero) {
+  $q.dialog({
+    title: '📞 Confirmar ligação',
+    message: `Ligar para <strong>${numero}</strong>?`,
+    html: true,
+    ok: { label: 'Ligar', color: 'red-7', unelevated: true },
+    cancel: { label: 'Cancelar', flat: true },
+  }).onOk(() => {
+    window.location.href = 'tel:' + numero
+  })
+}
+
+function handleLogout() {
+  $q.dialog({
+    title: 'Sair',
+    message: 'Deseja encerrar a sessão?',
+    ok: { label: 'Sair', color: 'indigo-7', unelevated: true },
+    cancel: { label: 'Cancelar', flat: true },
+  }).onOk(() => {
+    logoutMedico()
+    router.push('/login')
+  })
+}
+</script>
+
+<script>
+export default { name: 'IndexPage' }
+</script>
+
+<style scoped>
+.dash-layout {
+  background: #7b7fc4;
+  min-height: 100vh;
+}
+.dash-page {
+  background: #7b7fc4;
+  min-height: 100vh;
+  padding: 0 16px 24px 16px;
+}
+
+/* ── Modo escuro ── */
+.dark-mode.dash-layout {
+  background: #1e1e2e;
+}
+.dark-mode .dash-page {
+  background: #1e1e2e;
+}
+.dark-mode .card {
+  background: rgba(40, 40, 60, 0.92) !important;
+}
+.dark-mode .card-title {
+  color: #a5b4fc !important;
+}
+.dark-mode .dado-item {
+  color: #e2e8f0 !important;
+  border-color: #2d2d4e !important;
+}
+.dark-mode .consulta-item {
+  background: #2d2d4e !important;
+  color: #e2e8f0 !important;
+}
+.dark-mode .med-row {
+  border-color: #2d2d4e !important;
+}
+.dark-mode .med-nome {
+  color: #e2e8f0 !important;
+}
+.dark-mode .med-qtd {
+  color: #a5b4fc !important;
+}
+.dark-mode .barra-label {
+  color: #e2e8f0 !important;
+}
+.dark-mode .historico-btn {
+  background: #2d2d4e !important;
+}
+.dark-mode .historico-label {
+  color: #a5b4fc !important;
+}
+.dark-mode .header-boas-vindas {
+  color: #e2e8f0;
+}
+.dark-mode .config-card {
+  background: rgba(40, 40, 60, 0.92) !important;
+}
+.dark-mode .config-label {
+  color: #e2e8f0 !important;
+}
+.dark-mode .config-icon {
+  color: #a5b4fc !important;
+}
+.dark-mode .config-title {
+  color: white !important;
+}
+
+/* Calendário — textos brancos no modo escuro */
+.dark-mode :deep(.q-date__calendar-days-row .q-date__calendar-item button) {
+  color: #e2e8f0 !important;
+}
+.dark-mode :deep(.q-date__calendar-item--out .q-date__calendar-item button) {
+  color: #6b7280 !important;
+}
+.dark-mode :deep(.q-date__navigation .q-btn) {
+  color: #e2e8f0 !important;
+}
+.dark-mode :deep(.q-date__header-title) {
+  color: white !important;
+}
+.dark-mode :deep(.q-date__years-item button) {
+  color: #e2e8f0 !important;
+}
+.dark-mode :deep(.q-date__calendar-weekdays > div) {
+  color: #a5b4fc !important;
+}
+.dark-mode :deep(.q-btn.q-date__navigation-min-btns) {
+  color: white !important;
+}
+.dark-mode :deep(.q-date .q-btn__content) {
+  color: #e2e8f0 !important;
+}
+
+/* Emergência — textos brancos no modo escuro */
+.dark-mode .emerg-btn {
+  background: #3d2020 !important;
+}
+.dark-mode .emerg-label {
+  color: #f1f5f9 !important;
+}
+.dark-mode .emerg-num {
+  background: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+.dark-mode .emerg-title {
+  color: #fca5a5 !important;
+}
+
+/* ── Sidebar ── */
+:deep(.sidebar) {
+  background: #5a5fa8 !important;
+  border-right: none !important;
+}
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  height: 100%;
+}
+.nav-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  transition: all 0.2s;
+}
+.nav-btn:hover,
+.nav-btn.active {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: white !important;
+}
+.nav-divider {
+  width: 36px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 6px 0;
+}
+
+/* ── Header ── */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px 12px;
+}
+.header-mes {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-boas-vindas {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+.header-avatar {
+  background: #5a5fa8;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+.notif-btn {
+  color: white !important;
+}
+
+/* ── Grid ── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── Cards ── */
+.card {
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 18px rgba(60, 70, 160, 0.12);
+}
+.card-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #3730a3;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.card-dados {
+  grid-column: 1;
+  grid-row: 1;
+}
+.dado-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  color: #1e293b;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.dado-item:last-of-type {
+  border-bottom: none;
+}
+.dado-icon {
+  font-size: 16px;
+}
+.btn-editar-dados {
+  margin-top: 8px;
+  color: #6366f1 !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+}
+
+.card-calendario {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:deep(.q-date-custom) {
+  background: transparent !important;
+  width: 100%;
+}
+:deep(.q-date__header) {
+  display: none;
+}
+
+.card-consultas {
+  grid-column: 3;
+  grid-row: 1;
+}
+.consulta-item {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12.5px;
+  color: #1e293b;
+  background: #eef2ff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+}
+.btn-add-mini {
+  margin-top: 6px;
+  color: #6366f1 !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+}
+
+.card-estoque {
+  grid-column: 1;
+  grid-row: 2;
+}
+.grafico-barras {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 140px;
+  padding-top: 12px;
+}
+.barra-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.barra {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  min-height: 6px;
+  transition: height 0.4s ease;
+  cursor: pointer;
+}
+.barra-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.card-medicamentos {
+  grid-column: 2;
+  grid-row: 2;
+}
+.med-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f0f4ff;
+  font-family: 'Nunito', sans-serif;
+}
+.med-qtd {
+  font-size: 15px;
+  font-weight: 900;
+  color: #3730a3;
+  min-width: 24px;
+  text-align: right;
+}
+.med-nome {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 0.5px;
+}
+
+.card-emergencia {
+  grid-column: 3;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.emerg-title {
+  color: #b91c1c;
+}
+.emerg-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fef2f2;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.emerg-btn:hover {
+  background: #fee2e2;
+}
+.emerg-icon {
+  font-size: 26px;
+}
+.emerg-label {
+  flex: 1;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: #1e293b;
+}
+.emerg-num {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #dc2626;
+  background: #fecaca;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+.historico-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #eef2ff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+.historico-btn:hover {
+  background: #e0e7ff;
+}
+.historico-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: #3730a3;
+  letter-spacing: 1px;
+}
+
+/* ── Configurações ── */
+.config-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  min-height: 100vh;
+}
+.config-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.config-back-btn {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+}
+.config-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 3px;
+  margin: 0;
+  text-transform: uppercase;
+}
+.config-card {
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  padding: 8px 24px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 4px 18px rgba(60, 70, 160, 0.12);
+}
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.config-row:last-child {
+  border-bottom: none;
+}
+.config-row-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.config-icon {
+  color: #3730a3;
+}
+.config-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 1px;
+}
+
+/* ── Dialogs ── */
+.dialog-card {
+  border-radius: 20px;
+  min-width: 320px;
+}
+.dialog-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: #3730a3;
+  margin: 0;
+}
+.btn-salvar {
+  background: #6366f1 !important;
+  color: white !important;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+/* ── Responsivo ── */
+@media (max-width: 900px) {
+  .dash-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .card-calendario {
+    grid-column: 1 / -1;
+  }
+  .card-emergencia {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 600px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .card-dados,
+  .card-calendario,
+  .card-consultas,
+  .card-estoque,
+  .card-medicamentos,
+  .card-emergencia {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+</style>
