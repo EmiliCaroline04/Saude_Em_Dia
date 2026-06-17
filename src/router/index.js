@@ -22,12 +22,12 @@ const rotas = [
       },
       {
         path: '/emergencia',
-        component: () => import('../pages/emergenciapage.vue'),
+        component: () => import('../pages/Emergenciapage.vue'),
         meta: { requerAutenticacao: true },
       },
       {
         path: '/alarme',
-        component: () => import('../pages/alarmepage.vue'),
+        component: () => import('../pages/Alarmepage.vue'),
         meta: { requerAutenticacao: true },
       },
     ],
