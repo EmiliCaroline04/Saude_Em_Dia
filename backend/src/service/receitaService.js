@@ -1,8 +1,12 @@
 const pool = require("../config/db");
 
 class ReceitaService {
-    static async criarReceita(dados) {
+    static async criarReceita(dados, idPerfil) {
         const { id_paciente, id_medico, observacoes } = dados;
+
+        if (!idPerfil || idPerfil != 2) {
+            throw new Error("Apenas médicos podem criar receitas.");
+        }
 
         if (!id_paciente || id_paciente === null || id_paciente === undefined) {
             throw new Error("Erro ao adicionar receita: paciente não informado.");

@@ -30,7 +30,7 @@ exports.excluirUsuario = async (req, res) => {
 
 exports.excluirMedico = async (req, res) => {
     const { id_medico } = req.params;
-    const { id_perfil } = req.body;
+      const id_perfil = req.headers["id-perfil"];
 
     try {
         const medico = await UsuarioService.excluirMedico(id_medico, id_perfil);

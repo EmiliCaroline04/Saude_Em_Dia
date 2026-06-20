@@ -3,6 +3,11 @@ const UsuarioService = require("./usuarioService");
 
 class MedicoService {
     static async criarMedico(dados, idPerfil) {
+        
+        if (!idPerfil || idPerfil != 1) {
+            throw new Error("Apenas administradores podem criar médicos.");
+        }
+        
         const {
             crm,
             nome,

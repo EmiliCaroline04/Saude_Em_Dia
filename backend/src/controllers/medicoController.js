@@ -2,10 +2,10 @@ const MedicoService = require("../service/medicoService");
 
 exports.criarMedico = async (req, res) => {
     const dados = req.body;
-    const idPerfil = req.headers["id-perfil"];
+    const id_perfil = req.headers["id-perfil"];
 
     try {
-        const resultado = await MedicoService.criarMedico(dados, idPerfil);
+        const resultado = await MedicoService.criarMedico(dados, id_perfil);
 
         res.json({ message: "Médico criado com sucesso!", medico: resultado.medico, usuario: resultado.usuario });
     } catch (error) {

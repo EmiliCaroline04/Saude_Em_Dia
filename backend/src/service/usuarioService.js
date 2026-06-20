@@ -12,10 +12,10 @@ class UsuarioService {
         }
 
         // Verifica se o usuário já existe
-        const existeUsuario = await pool.query(`SELECT * FROM usuarios WHERE email = $1`, [email]);
-        if (existeUsuario.rows.length > 0) {
-            throw new Error("Usuário com este email já existe.");
-        }
+        // const existeUsuario = await pool.query(`SELECT * FROM usuarios WHERE email = $1`, [email]);
+        // if (existeUsuario.rows.length > 0) {
+        //     throw new Error("Usuário com este email já existe.");
+        // }
 
         // criptografa senha
         const senhaHash = await bcrypt.hash(senhaInformada, 10);
